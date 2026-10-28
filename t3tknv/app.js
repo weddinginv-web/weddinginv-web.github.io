@@ -263,8 +263,31 @@
       .to(intro, { opacity: 0, duration: 0.6 }, "<")
       .add(revealCard, "<0.2");
   }
-  intro.addEventListener("click", open);
-  intro.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); open(); } });
+  // ---------- first tap: silent car film, then the envelope opens by itself ----------
+  const film = $("#film");
+  const vid = $("#filmVid");
+  let filmStarted = false;
+  function playFilm() {
+    if (filmStarted) return;
+    filmStarted = true;
+    unlockMusic(); // must happen inside the tap
+    let done = false;
+    const finish = () => {
+      if (done) return;
+      done = true;
+      // the film ends on ivory, so fading it away reveals the envelope seamlessly
+      gsap.to(film, { autoAlpha: 0, duration: 0.6, onComplete: () => { vid.pause(); film.remove(); } });
+      gsap.delayedCall(0.35, open);
+    };
+    gsap.to(film, { autoAlpha: 1, duration: 0.4 });
+    vid.addEventListener("ended", finish, { once: true });
+    vid.addEventListener("error", finish, { once: true });
+    $("#filmSkip").addEventListener("click", e => { e.stopPropagation(); finish(); });
+    vid.play().catch(finish);
+    gsap.delayedCall(9, finish); // never get stuck on a slow connection
+  }
+  intro.addEventListener("click", playFilm);
+  intro.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); playFilm(); } });
 
   gsap.to(".seal", { scale: 1.05, duration: 1.4, yoyo: true, repeat: -1, ease: "sine.inOut" });
 })();

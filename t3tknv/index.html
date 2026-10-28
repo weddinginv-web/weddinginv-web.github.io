@@ -318,6 +318,11 @@
 <button id="musicBtn" class="music" aria-label="تشغيل/إيقاف الموسيقى" hidden>
   <span></span><span></span><span></span><span></span>
 </button>
+<!-- silent car intro, played after the first tap and before the envelope opens -->
+<div class="film" id="film" aria-hidden="true">
+  <video id="filmVid" src="intro.mp4" poster="intro-poster.jpg" muted playsinline preload="auto"></video>
+  <button class="film-skip" id="filmSkip" type="button">تخطي ›</button>
+</div>
 <audio id="music" src="music.mp3" preload="auto"></audio>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
