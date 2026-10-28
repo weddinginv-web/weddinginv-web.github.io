@@ -218,6 +218,19 @@
     });
 
     petals();
+    showScrollCue();
+  }
+
+  // ---------- "scroll down" hint ----------
+  function showScrollCue() {
+    const cue = $("#scrollCue");
+    const hide = () => {
+      if (scrollY < 40) return;
+      removeEventListener("scroll", hide);
+      gsap.to(cue, { autoAlpha: 0, y: 10, duration: 0.4, onComplete: () => cue.remove() });
+    };
+    gsap.fromTo(cue, { autoAlpha: 0, y: 12, xPercent: -50, x: 0 }, { autoAlpha: 1, y: 0, duration: 0.7, delay: 2.2, ease: "power2.out" });
+    addEventListener("scroll", hide, { passive: true });
   }
 
   function bloom(svg, delay) {
