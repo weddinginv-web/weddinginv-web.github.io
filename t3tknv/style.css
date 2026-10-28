@@ -130,7 +130,15 @@ body.locked { overflow: hidden; height: 100svh; }
   min-height: calc(100svh - 80px); display: flex; flex-direction: column; align-items: center; justify-content: center;
   padding-top: calc(var(--w) * .16);
 }
-.rosette { width: 96px; margin-bottom: 18px; }
+/* the couple's calligraphy monogram, painted in shimmering rose gold through a mask */
+.monogram {
+  width: 74px; aspect-ratio: 360 / 573; margin-bottom: 20px;
+  background: linear-gradient(100deg, #9a5a63 0%, #c98a86 30%, #f6d2c4 46%, #c98a86 60%, #9a5a63 100%);
+  background-size: 250% 100%; animation: foil 6s ease-in-out infinite;
+  -webkit-mask: url("monogram.png") center / contain no-repeat;
+  mask: url("monogram.png") center / contain no-repeat;
+  filter: drop-shadow(0 2px 3px rgba(150,80,90,.18));
+}
 .basmala { font-family: "Aref Ruqaa", serif; font-size: 1.35rem; color: var(--rose); }
 .verse { font-family: "Amiri Quran", "Amiri", serif; font-size: 1.42rem; line-height: 2.3; margin-top: 16px; }
 .verse .w { display: inline-block; }

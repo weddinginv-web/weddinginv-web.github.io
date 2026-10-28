@@ -138,7 +138,7 @@
   }
   const draw = (els, opts) => gsap.to(els, { strokeDashoffset: 0, ease: "power1.inOut", ...opts });
 
-  const rosetteLines = prepLines($(".rosette"));
+  gsap.set(".monogram", { opacity: 0, scale: 0.85, y: 10 });
   gsap.set(".portrait-frame", { opacity: 0, y: 30 });
   gsap.set("#couplePic", { scale: 1.12 });
   const florals = $$(".floral");
@@ -196,7 +196,7 @@
   function revealCard() {
     florals.forEach((f, i) => bloom(f, 0.1 + i * 0.25));
     gsap.timeline()
-      .add(draw(rosetteLines, { duration: 2, stagger: 0.12 }), 0)
+      .to(".monogram", { opacity: 1, scale: 1, y: 0, duration: 1.4, ease: "power2.out" }, 0)
       .to(".basmala", { opacity: 1, y: 0, duration: 0.9, ease: "power2.out" }, 0.4)
       .to(".verse .w", { opacity: 1, y: 0, filter: "blur(0px)", duration: 0.7, stagger: 0.16, ease: "power2.out" }, 1.1)
       .to(".verse-ref", { opacity: 1, y: 0, duration: 0.7 }, ">-0.2")
