@@ -72,6 +72,18 @@
   const DROP_AT = 5.5;
   audio.addEventListener("ended", () => { audio.currentTime = DROP_AT; audio.play(); });
   musicBtn.addEventListener("click", () => (audio.paused ? audio.play() : audio.pause()));
+  // stop the music when the guest leaves the invitation (switches app/tab or closes it),
+  // and pick it back up if they come back
+  let resumeOnReturn = false;
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden) {
+      if (!audio.paused) { resumeOnReturn = true; audio.pause(); }
+    } else if (resumeOnReturn) {
+      resumeOnReturn = false;
+      audio.play().catch(() => {});
+    }
+  });
+  addEventListener("pagehide", () => audio.pause());
   function startMusic() {
     audio.volume = 0;
     audio.play().then(() => {
