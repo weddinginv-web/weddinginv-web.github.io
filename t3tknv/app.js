@@ -225,14 +225,20 @@
     ambient();
   }
 
-  // ---------- open the envelope ----------
+  // ---------- the opening sequence ----------
+  // tap the seal -> envelope opens -> letter slides out and zooms until the screen is white
+  // -> the silent car film fades in and plays -> the film fades away -> the invitation
+  const film = $("#film");
+  const vid = $("#filmVid");
   let opened = false;
   function open() {
     if (opened) return;
     opened = true;
     scrollTo(0, 0);
     gsap.killTweensOf(".seal");
-    unlockMusic();
+    unlockMusic(); // must happen inside the tap
+    // start the video inside the tap too, then rewind it, so phones allow it to play later
+    vid.play().then(() => { vid.pause(); vid.currentTime = 0; }).catch(() => {});
     card.removeAttribute("aria-hidden");
     gsap.set(card, { opacity: 0, scale: 0.94, transformOrigin: "50% 30%" });
 
@@ -241,15 +247,8 @@
     const fill = Math.max(innerWidth / lr.width, innerHeight / lr.height) * 1.25;
     const fast = reduce ? 0.3 : 1;
 
-    const tl = gsap.timeline({
-      onComplete: () => {
-        intro.remove();
-        gsap.set(card, { clearProps: "transform,opacity" });
-        document.body.classList.remove("locked");
-        ScrollTrigger.refresh();
-      }
-    });
-    tl.to(".intro-text", { opacity: 0, y: 10, duration: 0.3 })
+    gsap.timeline()
+      .to(".intro-text", { opacity: 0, y: 10, duration: 0.3 })
       .to(".seal", { scale: 1.15, duration: 0.18 }, 0)
       .to(".seal", { scale: 0.3, opacity: 0, rotation: -30, duration: 0.4, ease: "back.in(1.6)" })
       .to(".flap", { rotationX: 180, duration: 0.8 * fast, ease: "power2.inOut" }, "-=0.05")
@@ -260,35 +259,35 @@
       .to(letter, { yPercent: 0, y: innerHeight / 2 - (lr.top + lr.height / 2), duration: 0.9 * fast, ease: "power2.inOut" }, "<")
       .to(".letter-inner", { opacity: 0, duration: 0.5 }, "<0.3")
       .to(letter, { scale: fill, borderRadius: 0, duration: 0.9 * fast, ease: "power2.in" }, "-=0.35")
-      .to(card, { opacity: 1, scale: 1, duration: 1.1 * fast, ease: "power2.out" }, "-=0.35")
-      .to(intro, { opacity: 0, duration: 0.6 }, "<")
-      .add(revealCard, "<0.2");
+      .add(playFilm);
   }
-  // ---------- first tap: silent car film, then the envelope opens by itself ----------
-  const film = $("#film");
-  const vid = $("#filmVid");
-  let filmStarted = false;
+
   function playFilm() {
-    if (filmStarted) return;
-    filmStarted = true;
-    unlockMusic(); // must happen inside the tap
     let done = false;
     const finish = () => {
       if (done) return;
       done = true;
-      // the film ends on ivory, so fading it away reveals the envelope seamlessly
-      gsap.to(film, { autoAlpha: 0, duration: 0.6, onComplete: () => { vid.pause(); film.remove(); } });
-      gsap.delayedCall(0.35, open);
+      intro.remove();
+      gsap.set(card, { opacity: 1 });
+      // fading the film away uncovers the invitation underneath
+      gsap.to(film, { autoAlpha: 0, duration: 0.9, ease: "power1.inOut", onComplete: () => { vid.pause(); film.remove(); } });
+      gsap.to(card, { scale: 1, duration: 1.2, ease: "power2.out", onComplete: () => {
+        gsap.set(card, { clearProps: "transform,opacity" });
+        document.body.classList.remove("locked");
+        ScrollTrigger.refresh();
+      } });
+      gsap.delayedCall(0.3, revealCard);
     };
-    gsap.to(film, { autoAlpha: 1, duration: 0.4 });
+    vid.currentTime = 0;
+    gsap.to(film, { autoAlpha: 1, duration: 0.6, ease: "power1.out" });
     vid.addEventListener("ended", finish, { once: true });
     vid.addEventListener("error", finish, { once: true });
     $("#filmSkip").addEventListener("click", e => { e.stopPropagation(); finish(); });
     vid.play().catch(finish);
     gsap.delayedCall(9, finish); // never get stuck on a slow connection
   }
-  intro.addEventListener("click", playFilm);
-  intro.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); playFilm(); } });
+  intro.addEventListener("click", open);
+  intro.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); open(); } });
 
   gsap.to(".seal", { scale: 1.05, duration: 1.4, yoyo: true, repeat: -1, ease: "sine.inOut" });
 })();
