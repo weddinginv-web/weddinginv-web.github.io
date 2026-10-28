@@ -253,7 +253,9 @@
       .to(".seal", { scale: 0.3, opacity: 0, rotation: -30, duration: 0.4, ease: "back.in(1.6)" })
       .to(".flap", { rotationX: 180, duration: 0.8 * fast, ease: "power2.inOut" }, "-=0.05")
       .set(".flap", { zIndex: 0 }, "-=0.4")
-      .to(letter, { yPercent: -62, duration: 0.9 * fast, ease: "power2.out" }, "-=0.1")
+      // slide the letter all the way out of the pocket before bringing it in front,
+      // so no hidden part of it pops into view
+      .to(letter, { yPercent: -108, duration: 1.2 * fast, ease: "power2.inOut" }, "-=0.1")
       .set(letter, { zIndex: 6 })
       .to(".env-back, .env-front, .flap", { y: innerHeight * 0.7, opacity: 0, duration: 0.9 * fast, ease: "power2.in" }, "+=0.15")
       .to(letter, { yPercent: 0, y: innerHeight / 2 - (lr.top + lr.height / 2), duration: 0.9 * fast, ease: "power2.inOut" }, "<")
