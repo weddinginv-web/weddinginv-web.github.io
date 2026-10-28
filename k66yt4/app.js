@@ -83,6 +83,10 @@
   // ---------- no animation library? show everything ----------
   const intro = $("#intro");
   const card = $("#card");
+  // always start at the top of the card, even when the phone restores an old scroll position
+  if ("scrollRestoration" in history) history.scrollRestoration = "manual";
+  scrollTo(0, 0);
+  addEventListener("load", () => { if (!document.getElementById("intro")?.dataset.open) scrollTo(0, 0); });
   document.body.classList.add("locked");
 
   // ---------- wall with a doorway-shaped hole ----------
@@ -143,7 +147,6 @@
   gsap.set($$(".floral .fl, .floral .lf"), { scale: 0, transformOrigin: "50% 50%" });
   gsap.set(".henna-dots circle", { scale: 0, transformOrigin: "50% 50%" });
   gsap.set(".cone", { opacity: 0, x: -30, y: -30 });
-  gsap.set(".hero .rv", { opacity: 0, y: 26 });
 
   // ---------- falling petals ----------
   function petals() {
@@ -167,15 +170,21 @@
   }
 
   // ---------- card entrance ----------
-  function revealCard() {
-    const tl = gsap.timeline();
-    tl.add(() => florals.forEach((f, i) => bloom(f, i * 0.25)))
-      .to(".hero .rv", { opacity: 1, y: 0, duration: 0.9, stagger: 0.18, ease: "power2.out" }, 0.2)
-      .add(draw(mandalaLines, { duration: 3, stagger: 0.04 }), "-=0.8");
+  // Text already on screen was seen through the doorway, so it stays put; only text further
+  // down fades in as the guest scrolls to it.
+  let belowFold = [];
+  function hideBelowFold() {
+    belowFold = $$(".rv").filter(el => el.getBoundingClientRect().top > innerHeight);
+    gsap.set(belowFold, { opacity: 0, y: 28 });
+  }
 
-    $$(".rv").filter(el => !el.closest(".hero")).forEach(el => {
-      gsap.from(el, {
-        opacity: 0, y: 28, duration: 0.9, ease: "power2.out",
+  function revealCard() {
+    florals.forEach((f, i) => bloom(f, i * 0.25));
+    draw(mandalaLines, { duration: 3, stagger: 0.04 });
+
+    belowFold.forEach(el => {
+      gsap.to(el, {
+        opacity: 1, y: 0, duration: 0.9, ease: "power2.out",
         scrollTrigger: { trigger: el, start: "top 92%" }
       });
     });
@@ -216,6 +225,7 @@
   function open() {
     if (opened) return;
     opened = true;
+    scrollTo(0, 0);
     intro.dataset.open = "1";
     gsap.killTweensOf(".seal");
     startMusic();
@@ -225,13 +235,21 @@
     // seen through the opening, comes forward to meet them
     const r = $(".doors").getBoundingClientRect();
     const cx = r.left + r.width / 2, cy = r.top + r.height * 0.45;
-    gsap.set(intro, { transformOrigin: `${cx}px ${cy}px` });
-    gsap.set(card, { transformOrigin: `50% ${cy}px`, scale: 0.82, filter: "brightness(.72)" });
+    hideBelowFold();
+    // Only transform and opacity are animated, and the moving pieces get their own GPU layers,
+    // so phones can run this smoothly. A plain overlay stands in for darkening the card.
+    const dim = document.createElement("div");
+    dim.style.cssText = "position:fixed;inset:0;z-index:45;background:#2a050b;opacity:.32;pointer-events:none";
+    document.body.appendChild(dim);
+    gsap.set(".doors, .seal", { filter: "none" });
+    gsap.set(intro, { transformOrigin: `${cx}px ${cy}px`, willChange: "transform, opacity", force3D: true });
+    gsap.set(card, { transformOrigin: `50% ${cy}px`, scale: 0.82, willChange: "transform", force3D: true });
 
     const tl = gsap.timeline({
       onComplete: () => {
         intro.remove();
-        gsap.set(card, { clearProps: "transform,filter" });
+        dim.remove();
+        gsap.set(card, { clearProps: "transform,willChange" });
         document.body.classList.remove("locked");
         ScrollTrigger.refresh();
       }
@@ -242,7 +260,8 @@
       .to(".door-l", { rotationY: -100, duration: reduce ? 0.3 : 1.6, ease: "power2.inOut" }, "-=0.1")
       .to(".door-r", { rotationY: 100, duration: reduce ? 0.3 : 1.6, ease: "power2.inOut" }, "<")
       .to(intro, { scale: 7, duration: reduce ? 0.4 : 1.7, ease: "power2.in" }, "<0.5")
-      .to(card, { scale: 1, filter: "brightness(1)", duration: reduce ? 0.4 : 1.9, ease: "power2.inOut" }, "<")
+      .to(card, { scale: 1, duration: reduce ? 0.4 : 1.9, ease: "power2.inOut" }, "<")
+      .to(dim, { opacity: 0, duration: reduce ? 0.4 : 1.9, ease: "power2.inOut" }, "<")
       .to(intro, { opacity: 0, duration: 0.3 }, "-=0.35")
       .add(revealCard, "-=0.9");
   }
