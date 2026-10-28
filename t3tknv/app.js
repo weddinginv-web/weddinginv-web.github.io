@@ -257,10 +257,12 @@
       // so no hidden part of it pops into view
       .to(letter, { yPercent: -108, duration: 1.2 * fast, ease: "power2.inOut" }, "-=0.1")
       .set(letter, { zIndex: 6 })
-      .to(".env-back, .env-front, .flap", { y: innerHeight * 0.7, opacity: 0, duration: 0.9 * fast, ease: "power2.in" }, "+=0.15")
-      .to(letter, { yPercent: 0, y: innerHeight / 2 - (lr.top + lr.height / 2), duration: 0.9 * fast, ease: "power2.inOut" }, "<")
-      .to(".letter-inner", { opacity: 0, duration: 0.5 }, "<0.3")
-      .to(letter, { scale: fill, borderRadius: 0, duration: 0.9 * fast, ease: "power2.in" }, "-=0.35")
+      // hold up high for a moment, then drop quickly to the middle while the envelope falls away
+      .to(".env-back, .env-front, .flap", { y: innerHeight * 0.7, opacity: 0, duration: 0.6 * fast, ease: "power2.in" }, "+=0.6")
+      .to(letter, { yPercent: 0, y: innerHeight / 2 - (lr.top + lr.height / 2), duration: 0.5 * fast, ease: "power3.inOut" }, "<")
+      // rest in the middle so the names can be read, then zoom into the paper
+      .to(".letter-inner", { opacity: 0, duration: 0.5 }, "+=0.9")
+      .to(letter, { scale: fill, borderRadius: 0, duration: 0.9 * fast, ease: "power2.in" }, "<0.1")
       .add(playFilm);
   }
 
