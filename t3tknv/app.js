@@ -129,6 +129,7 @@
 
   // ---------- line drawing helpers ----------
   function prepLines(scope) {
+    if (!scope) return [];
     return $$(".line-draw > *, .stem", scope).map(el => {
       const len = el.getTotalLength ? Math.ceil(el.getTotalLength()) + 1 : 400;
       el.style.strokeDasharray = len;

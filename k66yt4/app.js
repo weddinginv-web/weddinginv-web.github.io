@@ -140,6 +140,7 @@
 
   // ---------- prepare line drawing ----------
   function prepLines(scope) {
+    if (!scope) return [];
     return $$(".henna-line > *, .stem", scope).map(el => {
       const src = el.tagName === "use" ? document.querySelector(el.getAttribute("href")) : el;
       const len = src.getTotalLength ? Math.ceil(src.getTotalLength()) + 1 : 400;
