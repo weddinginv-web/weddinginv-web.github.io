@@ -89,7 +89,7 @@ body.locked { overflow: hidden; height: 100svh; }
   display: flex; align-items: center; justify-content: center;
   opacity: 0; visibility: hidden;
 }
-.film video { width: 100%; height: 100%; object-fit: cover; display: block; }
+.film video { width: 100%; height: 100%; object-fit: contain; display: block; }
 .film-skip {
   position: absolute; bottom: max(20px, env(safe-area-inset-bottom)); left: 16px;
   padding: 6px 14px; border-radius: 999px; border: 1px solid rgba(183,110,121,.5);
